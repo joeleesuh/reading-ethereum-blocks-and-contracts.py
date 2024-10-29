@@ -33,8 +33,6 @@ def is_ordered_block(w3, block_num):
             priority_fee = tx.gasPrice
         elif tx.type == "0x2":
             priority_fee = min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - base_fee_per_gas)
-            if tx.gasPrice is not None:
-                priority_fee = min(priority_fee, tx.gasPrice - base_fee_per_gas)
         else:
             continue
         fees.append(priority_fee)
@@ -48,7 +46,7 @@ def is_ordered_block(w3, block_num):
 
 def get_contract_values(contract, admin_address, owner_address):
 	onchain_root = contract.functions.merkleRoot().call()
-	default_admin_role = contract.functions.DEFAULT_ADMIN_ROLE().call()
+	default_admin_role = int.to_bytes(0, 32, byteorder="big")
 	has_role = contract.functions.hasRole(default_admin_role, admin_address).call()
 	prime = contract.functions.getPrimeByOwner(owner_address).call()
 	return onchain_root, has_role, prime
