@@ -1,5 +1,5 @@
-import json
 import random
+import json
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from web3.providers.rpc import HTTPProvider
@@ -21,23 +21,21 @@ def connect_with_middleware(contract_json):
 	w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 	contract = w3.eth.contract(address=Web3.to_checksum_address(address), abi=abi)
 	return w3, contract
-	
+
 def is_ordered_block(w3, block_num):
-    block = w3.eth.get_block(block_num, full_transactions=True)
-    transactions = block['transactions']
-    base_fee_per_gas = block.get('baseFeePerGas', 0)
-    fees = []
-    
-    for tx in transactions:
-        if tx.type == "0x0":
-            priority_fee = tx.gasPrice
-        elif tx.type == "0x2":
-            priority_fee = min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - base_fee_per_gas)
-        else:
-            continue  # Skip unknown transaction types
-        fees.append(priority_fee)
-    
-    return fees == sorted(fees, reverse=True)
+	block = w3.eth.get_block(block_num, full_transactions=True)
+	transactions = block['transactions']
+	base_fee_per_gas = block.get('baseFeePerGas', 0)
+	fees = []
+	for tx in transactions:
+		if tx.type == "0x0":
+			priority_fee = tx.gasPrice
+		elif tx.type == "0x2":
+			priority_fee = min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - base_fee_per_gas)
+		else:
+			continue
+		fees.append(priority_fee)
+	return fees == sorted(fees, reverse=True)
 
 def get_contract_values(contract, admin_address, owner_address):
 	onchain_root = contract.functions.merkleRoot().call()
@@ -56,16 +54,13 @@ if __name__ == "__main__":
 
 	latest_block = eth_w3.eth.get_block_number()
 	london_hard_fork_block_num = 12965000
-	assert latest_block > london_hard_fork_block_num, "Error: the chain never got past the London Hard Fork"
+	assert latest_block > london_hard_fork_block_num, f"Error: the chain never got past the London Hard Fork"
 
 	n = 5
 	for _ in range(n):
 		block_num = random.randint(1, london_hard_fork_block_num - 1)
 		ordered = is_ordered_block(eth_w3, block_num)
-		print(f"Block {block_num} is {'ordered' if ordered else 'not ordered'}")
-
-	onchain_root, has_role, prime = get_contract_values(contract, admin_address, owner_address)
-	print("On-chain Merkle Root:", onchain_root)
-	print("Admin Address Has Role:", has_role)
-	print("Prime for Owner Address:", prime)
-
+		if ordered:
+			print(f"Block {block_num} is ordered")
+		else:
+			print(f"Block {block_num} is not ordered")
