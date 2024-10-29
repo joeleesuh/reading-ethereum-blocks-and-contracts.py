@@ -23,19 +23,26 @@ def connect_with_middleware(contract_json):
 	return w3, contract
 
 def is_ordered_block(w3, block_num):
-	block = w3.eth.get_block(block_num, full_transactions=True)
-	transactions = block['transactions']
-	base_fee_per_gas = block.get('baseFeePerGas', 0)
-	fees = []
-	for tx in transactions:
-		if tx.type == "0x0":
-			priority_fee = tx.gasPrice
-		elif tx.type == "0x2":
-			priority_fee = min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - base_fee_per_gas)
-		else:
-			continue
-		fees.append(priority_fee)
-	return fees == sorted(fees, reverse=True)
+    block = w3.eth.get_block(block_num, full_transactions=True)
+    transactions = block['transactions']
+    base_fee_per_gas = block.get('baseFeePerGas', 0)
+    fees = []
+    
+    for tx in transactions:
+        if tx.type == "0x0":
+            priority_fee = tx.gasPrice
+        elif tx.type == "0x2":
+            priority_fee = min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - base_fee_per_gas)
+        else:
+            continue
+        fees.append(priority_fee)
+    
+    is_ordered = fees == sorted(fees, reverse=True)
+    
+    if not is_ordered:
+        print(f"Block {block_num} failed ordering check. Fees: {fees}")
+        
+    return is_ordered
 
 def get_contract_values(contract, admin_address, owner_address):
 	onchain_root = contract.functions.merkleRoot().call()
