@@ -32,9 +32,7 @@ def is_ordered_block(w3, block_num):
         if tx.type == "0x0":
             priority_fee = tx.gasPrice
         elif tx.type == "0x2":
-            priority_fee = min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - base_fee_per_g
-            if tx.gasPrice is not None:
-                priority_fee = min(priority_fee, tx.gasPrice - base_fee_per_gas)
+            priority_fee = min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - base_fee_per_gas)
         else:
             continue
         fees.append(priority_fee)
