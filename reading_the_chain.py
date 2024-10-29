@@ -39,6 +39,11 @@ def is_ordered_block(w3, block_num):
     
     is_ordered = fees == sorted(fees, reverse=True)
     
+    print(f"Block {block_num} - Base Fee: {base_fee_per_gas}")
+    for i, tx in enumerate(transactions):
+        tx_type = "Type 0" if tx.type == "0x0" else "Type 2" if tx.type == "0x2" else "Other"
+        print(f"  Tx {i}: Type: {tx_type}, Priority Fee: {fees[i]}")
+    
     if not is_ordered:
         print(f"Block {block_num} failed ordering check. Fees: {fees}")
         
