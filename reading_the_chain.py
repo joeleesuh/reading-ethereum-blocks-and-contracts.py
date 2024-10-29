@@ -4,14 +4,12 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from web3.providers.rpc import HTTPProvider
 
-
 def connect_to_eth():
 	infura_token = "3e2fa60f9efc4d79a7353ea9811da8aa"
 	url = f"https://mainnet.infura.io/v3/{infura_token}"
 	w3 = Web3(HTTPProvider(url))
 	assert w3.is_connected(), f"Failed to connect to provider at {url}"
 	return w3
-
 
 def connect_with_middleware(contract_json):
 	with open(contract_json, "r") as f:
@@ -23,23 +21,23 @@ def connect_with_middleware(contract_json):
 	w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 	contract = w3.eth.contract(address=Web3.to_checksum_address(address), abi=abi)
 	return w3, contract
-
-
+	
 def is_ordered_block(w3, block_num):
-	block = w3.eth.get_block(block_num, full_transactions=True)
-	transactions = block['transactions']
-	base_fee_per_gas = block.get('baseFeePerGas', 0)
-	fees = []
-	for tx in transactions:
-		if tx.type == "0x0":
-			priority_fee = tx.gasPrice
-		elif tx.type == "0x2":
-			priority_fee = min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - base_fee_per_gas)
-		else:
-			continue
-		fees.append(priority_fee)
-	return fees == sorted(fees, reverse=True)
-
+    block = w3.eth.get_block(block_num, full_transactions=True)
+    transactions = block['transactions']
+    base_fee_per_gas = block.get('baseFeePerGas', 0)
+    fees = []
+    
+    for tx in transactions:
+        if tx.type == "0x0":
+            priority_fee = tx.gasPrice
+        elif tx.type == "0x2":
+            priority_fee = min(tx.maxPriorityFeePerGas, tx.maxFeePerGas - base_fee_per_gas)
+        else:
+            continue
+        fees.append(priority_fee)
+    
+    return fees == sorted(fees, reverse=True)
 
 def get_contract_values(contract, admin_address, owner_address):
 	onchain_root = contract.functions.merkleRoot().call()
@@ -47,7 +45,6 @@ def get_contract_values(contract, admin_address, owner_address):
 	has_role = contract.functions.hasRole(default_admin_role, admin_address).call()
 	prime = contract.functions.getPrimeByOwner(owner_address).call()
 	return onchain_root, has_role, prime
-
 
 if __name__ == "__main__":
 	admin_address = "0xAC55e7d73A792fE1A9e051BDF4A010c33962809A"
