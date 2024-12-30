@@ -62,7 +62,6 @@ if __name__ == "__main__":
 	latest_block = eth_w3.eth.get_block_number()
 	london_hard_fork_block_num = 12965000
 	assert latest_block > london_hard_fork_block_num, f"Error: the chain never got past the London Hard Fork"
-
 	n = 5
 	for _ in range(n):
 		block_num = random.randint(1, london_hard_fork_block_num - 1)
