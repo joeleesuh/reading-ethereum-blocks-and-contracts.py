@@ -10,7 +10,6 @@ def connect_to_eth():
 	w3 = Web3(HTTPProvider(url))
 	assert w3.is_connected(), f"Failed to connect to provider at {url}"
 	return w3
-
 def connect_with_middleware(contract_json):
 	with open(contract_json, "r") as f:
 		d = json.load(f)
