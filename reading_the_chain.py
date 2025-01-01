@@ -4,7 +4,6 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from web3.providers.rpc import HTTPProvider
 
-
 def connect_to_eth():
 	infura_token = "3e2fa60f9efc4d79a7353ea9811da8aa"
 	url = f"https://mainnet.infura.io/v3/{infura_token}"
